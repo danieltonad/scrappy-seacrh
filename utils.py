@@ -17,7 +17,3 @@ def unordered_equal(a: list, b: str):
 def random_pick_phrase(_len: int = 12):
     random_items = random.sample(keys, _len)
     print(random_items)
-
-        
-for i in generate_permutations(['post', 'true', 'pigeon', 'fortune', 'wonder', 'rice', 'decade', 'gallery', 'mobile', 'interest', 'curious', 'grow']):
-    print(i)

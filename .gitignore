@@ -3,4 +3,3 @@ env
 __pycache__
 *.json
 *.sqlite
-*.txt

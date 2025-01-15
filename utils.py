@@ -16,4 +16,6 @@ def unordered_equal(a: list, b: str):
 
 def random_pick_phrase(_len: int = 12):
     random_items = random.sample(keys, _len)
-    print(random_items)
+    return random_items if is_valid_phrase(" ".join(random_items)) else random_pick_phrase(_len)
+
+print(random_pick_phrase())

@@ -2,6 +2,7 @@ import aiosqlite, asyncio
 from settings import settings
 
 
+
 async def connect():
     conn = await aiosqlite.connect(settings.DB_PATH)
     await conn.execute('CREATE TABLE IF NOT EXISTS seeds (id TEXT PRIMARY KEY)')
@@ -15,6 +16,7 @@ async def check_seed_exist(seed: list):
     all = await cursor.fetchall()
     await conn.close()
     for _ in all:
+        current_seed = _[0].split("-")
         if _[0] == seed:
             return True
     return False
@@ -32,6 +34,9 @@ async def count_seeds():
         count = await cursor.fetchone()
     await conn.close()
     return count[0]
+
+def unordered_equal(a: list, b: list):
+    return set(a) == set(b)
 
 
 # asyncio.run(count_seeds())

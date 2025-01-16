@@ -10,14 +10,14 @@ async def connect():
     return conn
 
 async def check_seed_exist(seed: list):
-    seed = "-".join(seed)
+    # seed = "-".join(seed)
     conn = await connect()
     cursor = await conn.execute('SELECT * FROM seeds')
     all = await cursor.fetchall()
     await conn.close()
     for _ in all:
         current_seed = _[0].split("-")
-        if _[0] == seed:
+        if unordered_equal(seed, current_seed):
             return True
     return False
 

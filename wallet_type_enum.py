@@ -4,7 +4,6 @@ class WalletType(Enum):
     BTC = "BTC"
     BNB = "BNB"
     TRX = "TRX"
-    ETH = "ETH"
     BCH = "BCH"
     LTC = "LTC"
     XRP = "XRP"
@@ -22,7 +21,6 @@ class WalletType(Enum):
             WalletType.BTC:(Bip84, Bip84Coins.BITCOIN),
             WalletType.BNB: (Bip44, Bip44Coins.BINANCE_SMART_CHAIN),
             WalletType.TRX:(Bip44, Bip44Coins.TRON),
-            WalletType.ETH:(Bip44, Bip44Coins.ETHEREUM),
             WalletType.BCH:(Bip44, Bip44Coins.BITCOIN_CASH),
             WalletType.LTC:(Bip44, Bip44Coins.LITECOIN),
             WalletType.XRP:(Bip44, Bip44Coins.RIPPLE),

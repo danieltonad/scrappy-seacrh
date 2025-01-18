@@ -1,7 +1,11 @@
 from wallet_type_enum import WalletType
 from seedler import spawn_seed, is_valid_phrase
 from wallets import generate_wallet_address, generate_public_key
-import asyncio
+import asyncio, json
+
+feeder = json.load(open("feeder.json", "r"))
+
+print(feeder)
 
 
 

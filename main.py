@@ -6,8 +6,10 @@ from utils import save_spot
 import asyncio, json
 
 feeder = json.load(open("feeder.json", "r"))
+found = 0
 
 async def scan_seed(seed: str):
+    global found
     for exchange in feeder.keys():
         itr = Exchange.get_exchange_uid(Exchange[exchange])
         exchange_dict = feeder[exchange]
@@ -16,18 +18,17 @@ async def scan_seed(seed: str):
             wallet_address: str = await generate_wallet_address(seed, coin, seedler, itr)
             if wallet_address.lower() == exchange_dict.get(wallet.value).lower():
                 await save_spot(seed=seed, exchange=exchange)
+                found += 1
             # print(f"{wallet.value}:", wallet_address.lower(), exchange_dict.get(wallet.value).lower(), exchange)
 
-async def pull_seeds(len: int = 12):
-    
+async def pull_seeds(_len: int = 12):
+    for i, seed in enumerate(await spawn_seed(_len)):
+        seed = " ".join(seed)
+        if is_valid_phrase(seed):
+            await scan_seed(seed)
+            print(f"  {i:,}  [{found}]      ", end="\r")
 
 
 async def main():
-    # for i,seed in enumerate(await spawn_seed()):
-    #     if is_valid_phrase(" ".join(seed)):
-    #         print(f"{i:,}", end="\r")
-    
-    seed = "fatigue purpose cable sniff tool lock roast risk pipe hunt buyer illness"
-    await scan_seed(seed)
-            
+    await pull_seeds(12)
 asyncio.run(main())

@@ -16,13 +16,13 @@ class WalletType(Enum):
     
     @staticmethod
     def coin_seedler(wallet_type: 'WalletType') -> str:
-        from bip_utils import Bip84, Bip84Coins,  Bip44, Bip44Coins
+        from bip_utils import Bip84, Bip84Coins,  Bip44, Bip44Coins, Bip49, Bip49Coins
         wallets = {
             WalletType.BTC:(Bip84, Bip84Coins.BITCOIN),
             WalletType.BNB: (Bip44, Bip44Coins.BINANCE_SMART_CHAIN),
             WalletType.TRX:(Bip44, Bip44Coins.TRON),
-            WalletType.BCH:(Bip44, Bip44Coins.BITCOIN_CASH),
-            WalletType.LTC:(Bip44, Bip44Coins.LITECOIN),
+            WalletType.BCH:(Bip49, Bip49Coins.BITCOIN_CASH),
+            WalletType.LTC:(Bip84, Bip84Coins.LITECOIN),
             WalletType.XRP:(Bip44, Bip44Coins.RIPPLE),
             WalletType.SOL:(Bip44, Bip44Coins.SOLANA),
             WalletType.DOGE:(Bip44, Bip44Coins.DOGECOIN),

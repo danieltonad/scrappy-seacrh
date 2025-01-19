@@ -22,11 +22,12 @@ async def scan_seed(seed: str):
             # print(f"{wallet.value}:", wallet_address.lower(), exchange_dict.get(wallet.value).lower(), exchange)
 
 async def pull_seeds(_len: int = 12):
-    for i, seed in enumerate(await spawn_seed(_len)):
-        seed = " ".join(seed)
-        if is_valid_phrase(seed):
-            await scan_seed(seed)
-            print(f"  {i:,}  [{found}]      ", end="\r")
+    while True:
+        print(f"  Scanning...  [{found}]      ", end="\r")
+        for i, seed in enumerate(await spawn_seed(_len)):
+            seed = " ".join(seed)
+            if is_valid_phrase(seed):
+                await scan_seed(seed)
 
 
 async def main():

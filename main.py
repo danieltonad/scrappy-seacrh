@@ -23,11 +23,13 @@ async def scan_seed(seed: str):
 
 async def pull_seeds(_len: int = 12):
     while True:
-        print(f"  Scanning...  [{found}]      ", end="\r")
         for i, seed in enumerate(await spawn_seed(_len)):
             seed = " ".join(seed)
             if is_valid_phrase(seed):
                 await scan_seed(seed)
+            if i % 1234 == 0:
+                print(f"  {i:,}  |  [{found}]      ", end="\r")
+                    
 
 
 async def main():

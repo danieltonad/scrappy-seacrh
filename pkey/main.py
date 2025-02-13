@@ -12,7 +12,14 @@ def fetch_holders() -> tuple:
         eth_bnb_holders = f.read().splitlines()
     return trx_holders, eth_bnb_holders
 
-def generate_trx_private_key() -> tuple:
+TRX, BNB_ETH = fetch_holders() 
+print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")
+
+def save_rag(pkey, address):
+    with open("pkey.rag", "a") as f:
+        f.write(f"{pkey} -> {address}\n")
+
+def generate_private_key() -> tuple:
     return secrets.token_hex(32), ''.join(random.choices('0123456789abcdef', k=64))
 
 def trx_private_key_to_address(private_key_hex: str) -> str:
@@ -30,18 +37,41 @@ def eth_private_key_to_address(private_key_hex: str) -> str:
     return '0x' + eth_address.hex()
 
 
-def
-TRX, BNB_ETH = fetch_holders()  
+def spin_shii(): 
+    pk1, pk2 = generate_private_key()
+    
+    pk1_trx_addr = trx_private_key_to_address(pk1)
+    pk1_bnb_eth_addr = eth_private_key_to_address(pk1)
+    
+    if pk1_trx_addr in TRX:
+        save_rag(pk1, pk1_trx_addr)
+        print(f"Saved {pk1} -> {pk1_trx_addr}")
+     
+    if pk1_bnb_eth_addr in BNB_ETH:
+        save_rag(pk1, pk1_bnb_eth_addr)
+        print(f"Saved {pk1} -> {pk1_bnb_eth_addr}")   
+    
+    pk2_trx_addr = trx_private_key_to_address(pk2)
+    pk2_bnb_eth_addr = eth_private_key_to_address(pk2)
+    
+    if pk2_trx_addr in TRX:
+        save_rag(pk2, pk2_trx_addr)
+        print(f"Saved {pk2} -> {pk2_trx_addr}")
+     
+    if pk2_bnb_eth_addr in BNB_ETH:
+        save_rag(pk2, pk2_bnb_eth_addr)
+        print(f"Saved {pk2} -> {pk2_bnb_eth_addr}")   
+    
 
-print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")
 
-pk1, pk2 = generate_trx_private_key()
+def main():
+    while True:
+        spin_shii()
+        
+        
+main()
 
-
-
-
-
-# pk1, pk2 = generate_trx_private_key()
+# pk1, pk2 = generate_private_key()
 # private_key_hex = "5aed2a12b51d621700f719c95115994cbc250347cab075e5e745d2eb0c33986a"
 # print("Private Key:", pk1)
 # print("TRX Address:", trx_private_key_to_address(pk1))

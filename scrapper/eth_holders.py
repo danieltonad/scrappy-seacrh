@@ -9,6 +9,7 @@ def save_eth_bnb_holders(holders: list):
         with open(eth_bnb_path, "r") as f:
             prev_holders = f.read().splitlines()
     holders = list(set(holders + prev_holders))
+    # print(f"Saving {len(holders):,} holders ...")
     with open(eth_bnb_path, "w") as f:
         for holder in holders:
             f.write(f"{holder}\n")

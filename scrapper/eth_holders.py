@@ -3,13 +3,13 @@ import asyncio, os
 
 
 def save_eth_bnb_holders(holders: list):
-    trx_path = "../data/eth_bnb_holders.txt"
+    eth_bnb_path = "../data/eth_bnb_holders.txt"
     prev_holders = []
-    if os.path.exists(trx_path):
-        with open(trx_path, "r") as f:
+    if os.path.exists(eth_bnb_path):
+        with open(eth_bnb_path, "r") as f:
             prev_holders = f.read().splitlines()
     holders = list(set(holders + prev_holders))
-    with open(trx_path, "w") as f:
+    with open(eth_bnb_path, "w") as f:
         for holder in holders:
             f.write(f"{holder}\n")
             
@@ -40,7 +40,7 @@ async def fetch_bnb_holders(page: int):
     save_eth_bnb_holders(all)
         
         
-for i in range(401):        
+for i in range(101):        
     asyncio.run(fetch_eth_holders(i))
     asyncio.run(fetch_eth_holders(i))
     print(f"Progress: {i} ...", end="\r")

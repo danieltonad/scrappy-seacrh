@@ -23,16 +23,18 @@ async def get_trx_holders():
     limit = 50
     all_data = []
     # url.format(20, 10)
-    while True:
-        start = len(all_data)
-        all_data += await fetch_trx_holders(start, limit)
-        
-        if len(all_data) > 9_990:
-            break
-        
-        print(f"Progress: {len(all_data)} ...", end="\r")
-        await asyncio.sleep(1)
-    
+    try:
+        while True:
+            start = len(all_data)
+            all_data += await fetch_trx_holders(start, limit)
+            
+            if len(all_data) > 9_990:
+                break
+            
+            print(f"Progress: {len(all_data)} ...", end="\r")
+            await asyncio.sleep(1)
+    except:
+        pass
     
     return all_data
 

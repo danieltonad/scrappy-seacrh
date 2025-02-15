@@ -46,3 +46,17 @@ for i in range(101):
     asyncio.run(fetch_eth_holders(i))
     print(f"Progress: {i} ...", end="\r")
     
+    
+
+trx_path = "../data/trx_holders.txt"
+eth_bnb_path = "../data/eth_bnb_holders.txt"
+
+def fetch_holders() -> tuple:
+    with open(trx_path, "r") as f:
+        trx_holders = f.read().splitlines()
+    with open(eth_bnb_path, "r") as f:
+        eth_bnb_holders = f.read().splitlines()
+    return trx_holders, eth_bnb_holders
+
+TRX, BNB_ETH = fetch_holders() 
+print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")

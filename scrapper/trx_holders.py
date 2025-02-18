@@ -38,8 +38,6 @@ async def get_trx_holders():
     
     return all_data
 
-res = asyncio.run(get_trx_holders())
-save_trx_holders(res)
 
 
 trx_path = "../data/trx_holders.txt"
@@ -51,6 +49,13 @@ def fetch_holders() -> tuple:
     with open(eth_bnb_path, "r") as f:
         eth_bnb_holders = f.read().splitlines()
     return trx_holders, eth_bnb_holders
+
+
+TRX, BNB_ETH = fetch_holders() 
+print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")
+
+res = asyncio.run(get_trx_holders())
+save_trx_holders(res)
 
 TRX, BNB_ETH = fetch_holders() 
 print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")

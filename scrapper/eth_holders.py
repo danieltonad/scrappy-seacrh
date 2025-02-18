@@ -40,11 +40,6 @@ async def fetch_bnb_holders(page: int):
             all.append(address)
     save_eth_bnb_holders(all)
         
-        
-for i in range(101):        
-    asyncio.run(fetch_eth_holders(i))
-    asyncio.run(fetch_eth_holders(i))
-    print(f"Progress: {i} ...", end="\r")
     
     
 
@@ -57,6 +52,14 @@ def fetch_holders() -> tuple:
     with open(eth_bnb_path, "r") as f:
         eth_bnb_holders = f.read().splitlines()
     return trx_holders, eth_bnb_holders
+
+TRX, BNB_ETH = fetch_holders() 
+print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")
+        
+for i in range(101):        
+    asyncio.run(fetch_eth_holders(i))
+    asyncio.run(fetch_eth_holders(i))
+    print(f"Progress: {i} ...", end="\r")
 
 TRX, BNB_ETH = fetch_holders() 
 print(f"Lodaed {len(TRX):,} TRX holders and {len(BNB_ETH):,} BNB/ETH holders")

@@ -4,3 +4,5 @@ __pycache__
 *.json
 *.db
 *.rag
+pussies.txt
+last_count.txt

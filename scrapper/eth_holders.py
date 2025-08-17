@@ -22,7 +22,7 @@ async def fetch_eth_holders(page: int):
     response = await session.get(url)
     data = response.html.find("td.d-flex.align-items-center")
     for dt in data:
-        address = str(dt.find("a.me-1", first=True).attrs.get("href")).split("/")[-1]
+        address = str(dt.find("a", first=True).attrs.get("href")).split("/")[-1]
         if address:
             all.append(address)
     save_eth_bnb_holders(all)
@@ -35,7 +35,7 @@ async def fetch_bnb_holders(page: int):
     response = await session.get(url)
     data = response.html.find("td.d-flex.align-items-center")
     for dt in data:
-        address = str(dt.find("a.me-1", first=True).attrs.get("href")).split("/")[-1]
+        address = str(dt.find("a", first=True).attrs.get("href")).split("/")[-1]
         if address:
             all.append(address)
     save_eth_bnb_holders(all)

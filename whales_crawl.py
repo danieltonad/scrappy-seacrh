@@ -5,7 +5,7 @@ from typing import Tuple, Set
 from math_shii import BITS
 
 trx_path = "./data/trx_holders.txt"
-eth_bnb_path = "./data/eth_bnb_holders.txt"
+eth_bnb_path = r"C:\Users\msiso\Downloads\eth_dump.txt"
 
 def last_count()-> int:
     with open("last_count.txt", "r") as f:
@@ -73,15 +73,18 @@ def play_in():
         odd_key = int_to_hex_string(odd_gen.prev())
         lcg_key = int_to_hex_string(lcg_gen.prev())
         prp_key = int_to_hex_string(prp_gen.prev())
+        count_key = int_to_hex_string(2**256 - count)
 
         odd_trx_address = trx_private_key_to_address(odd_key)
         lcg_trx_address = trx_private_key_to_address(lcg_key)
         prp_trx_address = trx_private_key_to_address(prp_key)
+        count_trx_address = trx_private_key_to_address(count_key)
 
         odd_eth_bnb_addr = eth_private_key_to_address(odd_key)
         lcg_eth_bnb_addr = eth_private_key_to_address(lcg_key)
         prp_eth_bnb_addr = eth_private_key_to_address(prp_key)
-        
+        count_eth_bnb_addr = eth_private_key_to_address(count_key)
+
         # TRX
         if odd_trx_address in TRX:
             print(f"Found TRX holder: {odd_trx_address} with key {odd_key}")
@@ -95,6 +98,10 @@ def play_in():
             print(f"Found TRX holder: {prp_trx_address} with key {prp_key}")
             save_rag(prp_key, prp_trx_address)
 
+        if count_trx_address in TRX:
+            print(f"Found TRX holder: {count_trx_address} with key {count_key}")
+            save_rag(count_key, count_trx_address)
+
         # BNB ETH
         if odd_eth_bnb_addr in BNB_ETH:
             print(f"Found ETH/BNB holder: {odd_eth_bnb_addr} with key {odd_key}")
@@ -107,6 +114,10 @@ def play_in():
         if prp_eth_bnb_addr in BNB_ETH:
             print(f"Found ETH/BNB holder: {prp_eth_bnb_addr} with key {prp_key}")
             save_rag(prp_key, prp_eth_bnb_addr)
+
+        if count_eth_bnb_addr in BNB_ETH:
+            print(f"Found ETH/BNB holder: {count_eth_bnb_addr} with key {count_key}")
+            save_rag(count_key, count_eth_bnb_addr)
         
         if count % 10_011 == 0:
             save_last_count(count)

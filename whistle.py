@@ -6,4 +6,3 @@ def load_pussies() -> Set[str]:
         return set(f.read().splitlines())
     
 
-print(load_pussies())

@@ -182,3 +182,7 @@ def int_to_hex_string(n: int) -> str:
 # print(shit)
 # for i in shit:
 #     print(i)
+
+
+
+# print(btc_addresses_from_private_key("0000000000000000000000000000000000000000000000000000000000000000"))

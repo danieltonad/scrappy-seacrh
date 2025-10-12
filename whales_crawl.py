@@ -2,6 +2,7 @@ from tronpy.keys import PrivateKey
 import random, secrets, hashlib, ecdsa
 from typing import Tuple, Set
 from math_shii import BITS
+from typing import Callable, Optional
 from btc_gen_shit import btc_addresses_from_private_key, ltc_addresses_from_private_key, bch_cashaddr_from_private_key
 
 trx_path = "./data/trx_holders.txt"
@@ -47,6 +48,66 @@ def trx_private_key_to_address(private_key_hex: str) -> str:
         return priv_key.public_key.to_base58check_address()
     except Exception as e:
         return None
+    
+def _default_entropy(nbytes: int) -> bytes:
+    return secrets.token_bytes(nbytes)
+    
+def generate_secure_bigint(
+    bit_length: int = 256,
+    *,
+    allow_zero: bool = True,
+    entropy_fn: Optional[Callable[[int], bytes]] = None
+) -> int:
+
+    if entropy_fn is None:
+        entropy_fn = _default_entropy
+
+    nbytes = (bit_length + 7) // 8  # number of full bytes needed
+    top_bits = nbytes * 8 - bit_length  # number of unused high bits in the top byte
+
+    # Rejection loop only used for allow_zero == False. For allow_zero==True there is
+    # no bias because we are generating exactly bit_length bits and mapping to 0..2**bit_length-1.
+    while True:
+        raw = entropy_fn(nbytes)  # cryptographic randomness
+
+        # mask away extra top bits so we produce exactly `bit_length` bits
+        if top_bits:
+            mask = (1 << (8 - top_bits)) - 1
+            raw = bytes([raw[0] & mask]) + raw[1:]
+
+        value = int.from_bytes(raw, "big")
+
+        if 0 <= value < (1 << bit_length):
+            if not allow_zero and value == 0:
+                # very rare; re-sample
+                continue
+            return value
+        continue
+    
+def heaps_permutations(seq):
+    """
+    Yield all permutations of seq using Heap's algorithm.
+    Works in-place, uses O(n) memory.
+    """
+    seq = list(seq)
+    n = len(seq)
+    c = [0] * n
+    yield ''.join(seq)
+
+    i = 0
+    while i < n:
+        if c[i] < i:
+            # swap depends on even/odd i
+            if i % 2 == 0:
+                seq[0], seq[i] = seq[i], seq[0]
+            else:
+                seq[c[i]], seq[i] = seq[i], seq[c[i]]
+            yield ''.join(seq)
+            c[i] += 1
+            i = 0
+        else:
+            c[i] = 0
+            i += 1
 
 def save_rag(pkey, address):
     with open("pkey.rag", "a") as f:
@@ -67,182 +128,49 @@ def eth_private_key_to_address(private_key_hex: str) -> str:
 
 
 def play_in():
-    from math_shii import OddStepReverse, LCGReverse, PRPCounterReverse
-    BITS = 256
-    START = (1 << BITS)  # == 2^256
-    count = last_count()
-    odd_gen = OddStepReverse(START, 2**32 + 1)
-    lcg_gen = LCGReverse(START, 5, 1)
-    prp_gen = PRPCounterReverse(START)
+    big_int = generate_secure_bigint(256, allow_zero=False)
+    print(f"Digging... {big_int:,}")
+    for new_int in heaps_permutations(str(big_int)):
+        new_int = int(new_int)
+        hex = int_to_hex_string(new_int)
 
-    if count:
-        odd_gen.jump(count)
-        lcg_gen.jump(count)
-        prp_gen.jump(count)
-        print(f"Last count: {count:,}", end="\r")
-    
-    while True:
-        odd_key = int_to_hex_string(odd_gen.prev())
-        lcg_key = int_to_hex_string(lcg_gen.prev())
-        prp_key = int_to_hex_string(prp_gen.prev())
-        even_key = int_to_hex_string(odd_gen.prev() + 1)
-        count_key = int_to_hex_string(2**256 - count)
-
-        odd_trx_address = trx_private_key_to_address(odd_key)
-        lcg_trx_address = trx_private_key_to_address(lcg_key)
-        prp_trx_address = trx_private_key_to_address(prp_key)
-        count_trx_address = trx_private_key_to_address(count_key)
-        even_key_address = trx_private_key_to_address(even_key)
-
-        odd_eth_bnb_addr = eth_private_key_to_address(odd_key)
-        lcg_eth_bnb_addr = eth_private_key_to_address(lcg_key)
-        prp_eth_bnb_addr = eth_private_key_to_address(prp_key)
-        count_eth_bnb_addr = eth_private_key_to_address(count_key)
-        even_key_eth_bnb_addr = eth_private_key_to_address(even_key)
-
-        odd_btc_addresses = btc_addresses_from_private_key(odd_key)
-        lcg_btc_addresses = btc_addresses_from_private_key(lcg_key)
-        prp_btc_addresses = btc_addresses_from_private_key(prp_key)
-        count_btc_addresses = btc_addresses_from_private_key(count_key)
-        even_key_btc_addresses = btc_addresses_from_private_key(even_key)
-
-        odd_ltc_addresses = ltc_addresses_from_private_key(odd_key)
-        lcg_ltc_addresses = ltc_addresses_from_private_key(lcg_key)
-        prp_ltc_addresses = ltc_addresses_from_private_key(prp_key)
-        count_ltc_addresses = ltc_addresses_from_private_key(count_key)
-        even_key_ltc_addresses = ltc_addresses_from_private_key(even_key)
-
-        odd_bch_address = bch_cashaddr_from_private_key(odd_key)
-        lcg_bch_address = bch_cashaddr_from_private_key(lcg_key)
-        prp_bch_address = bch_cashaddr_from_private_key(prp_key)
-        count_bch_address = bch_cashaddr_from_private_key(count_key)
-        even_key_bch_address = bch_cashaddr_from_private_key(even_key)
+        trx_address = trx_private_key_to_address(hex)
+        eth_bnb_addr = eth_private_key_to_address(hex)
+        btc_addresses = btc_addresses_from_private_key(hex)
+        ltc_addresses = ltc_addresses_from_private_key(hex)
+        bch_address = bch_cashaddr_from_private_key(hex)
 
         # TRX
-        if odd_trx_address in TRX:
-            print(f"Found TRX holder: {odd_trx_address} with key {odd_key}")
-            save_rag(odd_key, odd_trx_address)
+        if trx_address in TRX:
+            print(f"Found TRX holder: {trx_address} with key {hex}")
+            save_rag(hex, trx_address)
 
-        if lcg_trx_address in TRX:
-            print(f"Found TRX holder: {lcg_trx_address} with key {lcg_key}")
-            save_rag(lcg_key, lcg_trx_address)
-
-        if prp_trx_address in TRX:
-            print(f"Found TRX holder: {prp_trx_address} with key {prp_key}")
-            save_rag(prp_key, prp_trx_address)
-
-        if count_trx_address in TRX:
-            print(f"Found TRX holder: {count_trx_address} with key {count_key}")
-            save_rag(count_key, count_trx_address)
-
-        if even_key_address in TRX:
-            print(f"Found TRX holder: {even_key_address} with key {even_key}")
-            save_rag(even_key, even_key_address)
-
-        # BNB ETH
-        if odd_eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {odd_eth_bnb_addr} with key {odd_key}")
-            save_rag(odd_key, odd_eth_bnb_addr)
-
-        if lcg_eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {lcg_eth_bnb_addr} with key {lcg_key}")
-            save_rag(lcg_key, lcg_eth_bnb_addr)
-
-        if prp_eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {prp_eth_bnb_addr} with key {prp_key}")
-            save_rag(prp_key, prp_eth_bnb_addr)
-
-        if count_eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {count_eth_bnb_addr} with key {count_key}")
-            save_rag(count_key, count_eth_bnb_addr)
-
-        if even_key_eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {even_key_eth_bnb_addr} with key {even_key}")
-            save_rag(even_key, even_key_eth_bnb_addr)
+        # ETH/BNB
+        if eth_bnb_addr in BNB_ETH:
+            print(f"Found ETH/BNB holder: {eth_bnb_addr} with key {hex}")
+            save_rag(hex, eth_bnb_addr)
 
         
         # BCH
-        if odd_bch_address in BCH:
-            print(f"Found BCH holder: {odd_bch_address} with key {odd_key}")
-            save_rag(odd_key, odd_bch_address)
-
-        if lcg_bch_address in BCH:
-            print(f"Found BCH holder: {lcg_bch_address} with key {lcg_key}")
-            save_rag(lcg_key, lcg_bch_address)
-
-        if prp_bch_address in BCH:
-            print(f"Found BCH holder: {prp_bch_address} with key {prp_key}")
-            save_rag(prp_key, prp_bch_address)
-
-        if count_bch_address in BCH:
-            print(f"Found BCH holder: {count_bch_address} with key {count_key}")
-            save_rag(count_key, count_bch_address)
-
-        if even_key_bch_address in BCH:
-            print(f"Found BCH holder: {even_key_bch_address} with key {even_key}")
-            save_rag(even_key, even_key_bch_address)
+        if bch_address in BCH:
+            print(f"Found BCH holder: {bch_address} with key {hex}")
+            save_rag(hex, bch_address)
 
         # BTC
-        for addr in odd_btc_addresses:
+        for addr in btc_addresses:
             if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {odd_key}")
-                save_rag(odd_key, addr)
-
-        for addr in lcg_btc_addresses:
-            if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {lcg_key}")
-                save_rag(lcg_key, addr)
-
-        for addr in prp_btc_addresses:
-            if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {prp_key}")
-                save_rag(prp_key, addr)
-
-        for addr in count_btc_addresses:
-            if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {count_key}")
-                save_rag(count_key, addr)
-        
-        for addr in even_key_btc_addresses:
-            if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {even_key}")
-                save_rag(even_key, addr)
+                print(f"Found BTC holder: {addr} with key {hex}")
+                save_rag(hex, addr)
 
 
         # LTC
-        for addr in odd_ltc_addresses:
+        for addr in ltc_addresses:
             if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {odd_key}")
-                save_rag(odd_key, addr)
-
-        for addr in lcg_ltc_addresses:
-            if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {lcg_key}")
-                save_rag(lcg_key, addr)
-
-        for addr in prp_ltc_addresses:
-            if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {prp_key}")
-                save_rag(prp_key, addr)
-
-        for addr in count_ltc_addresses:
-            if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {count_key}")
-                save_rag(count_key, addr)
-
-        for addr in even_key_ltc_addresses:
-            if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {even_key}")
-                save_rag(even_key, addr)
-
-        if count % 10_011 == 0:
-            save_last_count(count)
-            print(f"Last count: {count:,}", end="\r")
+                print(f"Found LTC holder: {addr} with key {hex}")
+                save_rag(hex, addr)
         
-        count += 1
+        # print(f"Digging... {new_int:,}", end="\r")
 
 if __name__ == "__main__":
-    play_in()
-
-# print(trx_private_key_to_address(int_to_hex_string(96690521103684763241907041926562609780425301947070575270117074750536375318862)))
-# print(eth_private_key_to_address(int_to_hex_string(96690521103684763241907041926562609780425301947070575270117074750536375318862)))
+    while True:
+        play_in()

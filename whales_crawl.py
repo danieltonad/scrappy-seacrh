@@ -84,30 +84,39 @@ def generate_secure_bigint(
             return value
         continue
     
-def heaps_permutations(seq):
+def heaps_permutations(seq, jump=None):
     """
-    Yield all permutations of seq using Heap's algorithm.
-    Works in-place, uses O(n) memory.
+    Yield permutations of seq using Heap's algorithm.
+    If jump is None, yield all permutations.
+    If jump is an integer k > 0, yield every (k+1)th permutation.
     """
     seq = list(seq)
     n = len(seq)
     c = [0] * n
-    yield ''.join(seq)
+    count = 0
+    step = jump + 1 if jump is not None else 1
+
+    # always yield the first permutation
+    if count % step == 0:
+        yield ''.join(seq)
+    count += 1
 
     i = 0
     while i < n:
         if c[i] < i:
-            # swap depends on even/odd i
             if i % 2 == 0:
                 seq[0], seq[i] = seq[i], seq[0]
             else:
                 seq[c[i]], seq[i] = seq[i], seq[c[i]]
-            yield ''.join(seq)
+            if count % step == 0:
+                yield ''.join(seq)
+            count += 1
             c[i] += 1
             i = 0
         else:
             c[i] = 0
             i += 1
+
 
 def save_rag(pkey, address):
     with open("pkey.rag", "a") as f:
@@ -127,50 +136,52 @@ def eth_private_key_to_address(private_key_hex: str) -> str:
         return None
 
 
-def play_in():
-    big_int = generate_secure_bigint(256, allow_zero=False)
-    print(f"Digging... {big_int:,}")
-    for new_int in heaps_permutations(str(big_int)):
-        new_int = int(new_int)
-        hex = int_to_hex_string(new_int)
+def play_in(big_int: int = None):
+    if big_int is None:
+        big_int = generate_secure_bigint(256, allow_zero=False)
 
-        trx_address = trx_private_key_to_address(hex)
-        eth_bnb_addr = eth_private_key_to_address(hex)
-        btc_addresses = btc_addresses_from_private_key(hex)
-        ltc_addresses = ltc_addresses_from_private_key(hex)
-        bch_address = bch_cashaddr_from_private_key(hex)
+    # print(f"Digging... [{len(str(big_int))}] -> {big_int:,}")
 
-        # TRX
-        if trx_address in TRX:
-            print(f"Found TRX holder: {trx_address} with key {hex}")
-            save_rag(hex, trx_address)
+    new_int = int(big_int)
+    hex = int_to_hex_string(new_int)
 
-        # ETH/BNB
-        if eth_bnb_addr in BNB_ETH:
-            print(f"Found ETH/BNB holder: {eth_bnb_addr} with key {hex}")
-            save_rag(hex, eth_bnb_addr)
+    trx_address = trx_private_key_to_address(hex)
+    eth_bnb_addr = eth_private_key_to_address(hex)
+    btc_addresses = btc_addresses_from_private_key(hex)
+    ltc_addresses = ltc_addresses_from_private_key(hex)
+    bch_address = bch_cashaddr_from_private_key(hex)
 
-        
-        # BCH
-        if bch_address in BCH:
-            print(f"Found BCH holder: {bch_address} with key {hex}")
-            save_rag(hex, bch_address)
+    # TRX
+    if trx_address in TRX:
+        print(f"Found TRX holder: {trx_address} with key {hex}")
+        save_rag(hex, trx_address)
 
-        # BTC
-        for addr in btc_addresses:
-            if addr in BTC:
-                print(f"Found BTC holder: {addr} with key {hex}")
-                save_rag(hex, addr)
+    # ETH/BNB
+    if eth_bnb_addr in BNB_ETH:
+        print(f"Found ETH/BNB holder: {eth_bnb_addr} with key {hex}")
+        save_rag(hex, eth_bnb_addr)
+
+    
+    # BCH
+    if bch_address in BCH:
+        print(f"Found BCH holder: {bch_address} with key {hex}")
+        save_rag(hex, bch_address)
+
+    # BTC
+    for addr in btc_addresses:
+        if addr in BTC:
+            print(f"Found BTC holder: {addr} with key {hex}")
+            save_rag(hex, addr)
 
 
-        # LTC
-        for addr in ltc_addresses:
-            if addr in LTC:
-                print(f"Found LTC holder: {addr} with key {hex}")
-                save_rag(hex, addr)
-        
-        # print(f"Digging... {new_int:,}", end="\r")
+    # LTC
+    for addr in ltc_addresses:
+        if addr in LTC:
+            print(f"Found LTC holder: {addr} with key {hex}")
+            save_rag(hex, addr)
+    
+    # print(f"Digging... {new_int:,}", end="\r")
+
 
 if __name__ == "__main__":
-    while True:
-        play_in()
+    play_in()

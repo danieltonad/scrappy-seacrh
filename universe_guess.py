@@ -1,7 +1,7 @@
 from whales_crawl import play_in, random
 import sqlite3
 
-DB_PATH = r"D:\9ja\general.db"
+DB_PATH = r"D:\9ja\nysc.db"
 
 
 def pull_data_from_db(table: str) -> list:
@@ -19,12 +19,13 @@ def pull_big_int_from_seed(_seed: str) -> int:
 
 
 def main():
-    data =  pull_data_from_db("pussios")
+    data =  pull_data_from_db("pcm")
     total = len(data)
     for i, row in enumerate(data):
         _seed = " ".join(map(str, row))
-        big_int = pull_big_int_from_seed(_seed)
-        play_in(big_int)
+        play_in(pull_big_int_from_seed(_seed))
+        _seed = "".join(s.replace(" ", "") for s in map(str, row)) # Remove spaces
+        play_in(pull_big_int_from_seed(_seed))
         for item in row:
             _seed = str(item).strip()
             if not _seed:
